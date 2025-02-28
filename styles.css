@@ -1,0 +1,329 @@
+/* 基础样式 */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    font-family: Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+    transition: background 1s ease;
+}
+
+/* 动态背景效果 */
+.background-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.background-glow::before,
+.background-glow::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    animation: glowPulse 4s infinite alternate;
+}
+
+.background-glow::before {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.background-glow::after {
+    bottom: 20%;
+    right: 20%;
+    animation-delay: 2s;
+}
+
+@keyframes glowPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0.1;
+    }
+}
+
+.face-container {
+    position: relative;
+    margin-bottom: 50px;
+    transform: scale(1.5);
+    transition: transform 0.3s ease;
+}
+
+.face {
+    width: 300px;
+    height: 300px;
+    background-color: #ffde59;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* 面部红晕 */
+.blush {
+    position: absolute;
+    width: 30px;
+    height: 15px;
+    background-color: #ff7979;
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(5px);
+    transition: opacity 0.3s ease;
+}
+
+.blush.left {
+    left: 40px;
+    top: 100px;
+}
+
+.blush.right {
+    right: 40px;
+    top: 100px;
+}
+
+.eyes {
+    display: flex;
+    justify-content: space-between;
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+.eye {
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    border: 4px solid #333;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    box-shadow: inset 0 -3px 8px rgba(0,0,0,0.1);
+}
+
+.eye::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background-color: #333;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(var(--pupil-x, 0) - 50%), calc(var(--pupil-y, 0) - 50%));
+    transition: all 0.2s ease;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* 添加眼睛高光 */
+.eye::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    top: 30%;
+    left: 60%;
+    z-index: 2;
+    opacity: 0.7;
+}
+
+.mouth {
+    width: 120px;
+    height: 60px;
+    background-color: #ff9999;
+    border: 12px solid #333;
+    border-radius: 0 0 60px 60px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: inset 0 -10px 15px rgba(0,0,0,0.1);
+}
+
+.mouth::after {
+    content: '';
+    position: absolute;
+    width: 70px;
+    height: 35px;
+    background: linear-gradient(to bottom, #ff7979 60%, #ff5555);
+    border-radius: 35px 35px 20px 20px;
+    bottom: 5px;
+    z-index: 1;
+    transition: all 0.3s ease;
+    filter: brightness(0.95);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+.blush {
+    position: absolute;
+    width: 45px;
+    height: 22px;
+    background-color: #ff7979;
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.3s ease;
+}
+
+.blush.left {
+    left: 60px;
+    top: 150px;
+}
+
+.blush.right {
+    right: 60px;
+    top: 150px;
+}
+
+.buttons {
+    display: flex;
+    gap: 30px;
+    transform: scale(1.2);
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 按钮波纹效果 */
+.ripple {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+/* 按钮悬停效果 */
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#like {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#dislike {
+    background-color: #f44336;
+    color: white;
+}
+
+/* 加载状态 */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.love-text {
+    position: absolute;
+    top: -60px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff4081;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* 粒子效果增强 */
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* 爱心动画 */
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-100px) rotate(360deg); }
+}
+
+/* 表情符号动画 */
+.emoji {
+    position: absolute;
+    font-size: 24px;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* 云朵动画 */
+@keyframes cloudFloat {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100vw); }
+}
+
+.cloud {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    filter: blur(5px);
+    opacity: 0.6;
+    animation: cloudFloat linear infinite;
+    z-index: 1;
+}
+
+/* 按钮光晕效果 */
+.buttons::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: translateY(20px);
+    filter: blur(10px);
+    z-index: -1;
+}
+
+/* 背景色相变化类 */
+.bg-happy {
+    background: linear-gradient(135deg, #a8edea 0%, #fff1f1 100%);
+}
+
+.bg-angry {
+    background: linear-gradient(135deg, #ffd1d1 0%, #ffd6a5 100%);
+}

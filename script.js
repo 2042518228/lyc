@@ -1,4 +1,11 @@
+let likeClickCount = 0;
+let dislikeClickCount = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
+    // 背景音乐控制
+    const bgMusic = document.getElementById('bgMusic');
+    bgMusic.volume = 0.5; // 设置适中的音量
+
     const face = document.getElementById('face');
     const mouth = document.getElementById('mouth');
     const leftEye = document.getElementById('leftEye');
@@ -224,8 +231,31 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundGlow.className = 'background-glow';
     document.body.appendChild(backgroundGlow);
     
+    function createRipple(event, button) {
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        button.appendChild(ripple);
+    
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+    
+        const x = event.clientX - rect.left - size/2;
+        const y = event.clientY - rect.top - size/2;
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+    
+        ripple.addEventListener('animationend', () => ripple.remove());
+    }
+    
     // 点击喜欢按钮
-    likeBtn.addEventListener('click', () => {
+    likeBtn.addEventListener('click', (event) => {
+        likeClickCount = (likeClickCount % 3) + 1; // 1-3循环
+        createRipple(event, likeBtn);
+        // 播放背景音乐
+        bgMusic.play().catch(error => {
+            console.log('音乐播放失败:', error);
+        });
         // 清除所有已存在的emoji元素
         const existingEmojis = document.querySelectorAll('.emoji');
         existingEmojis.forEach(emoji => emoji.remove());
@@ -251,8 +281,81 @@ document.addEventListener('DOMContentLoaded', () => {
         // 显示文字和红晕
         loveText.style.opacity = '1';
         loveText.style.transform = 'translateY(0)';
-        leftBlush.style.opacity = '1';
-        rightBlush.style.opacity = '1';
+        leftBlush.style.opacity = likeClickCount >= 2 ? '1' : '0';
+        rightBlush.style.opacity = likeClickCount >= 2 ? '1' : '0';
+        
+        // 根据点击次数设置不同的动画效果
+        switch(likeClickCount) {
+            case 1: // 第一级动画
+                // 基础开心表情
+                anime({
+                    targets: mouth,
+                    borderRadius: '0 0 40px 40px',
+                    height: 50,
+                    duration: 500,
+                    easing: 'easeOutElastic(1, .5)'
+                });
+                mouth.style.borderTop = 'none';
+                mouth.style.borderBottom = '8px solid #333';
+                
+                anime({
+                    targets: [leftEye, rightEye],
+                    height: 10,
+                    borderRadius: '50% 50% 0 0',
+                    duration: 500,
+                    easing: 'easeOutElastic(1, .5)'
+                });
+                break;
+                
+            case 2: // 第二级动画
+                // 更夸张的开心表情
+                anime({
+                    targets: mouth,
+                    borderRadius: '0 0 60px 60px',
+                    height: 70,
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .3)'
+                });
+                mouth.style.borderTop = 'none';
+                mouth.style.borderBottom = '12px solid #333';
+                
+                anime({
+                    targets: [leftEye, rightEye],
+                    height: 8,
+                    borderRadius: '50% 50% 0 0',
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .3)'
+                });
+                
+                // 添加彩虹背景
+                face.style.background = 'linear-gradient(45deg, #ffde59, #ff9999, #ff99cc, #99ff99)';
+                break;
+                
+            case 3: // 第三级动画
+                // 超级夸张的开心表情
+                anime({
+                    targets: mouth,
+                    borderRadius: '0 0 80px 80px',
+                    height: 90,
+                    duration: 1000,
+                    easing: 'easeOutElastic(1, .2)'
+                });
+                mouth.style.borderTop = 'none';
+                mouth.style.borderBottom = '15px solid #333';
+                
+                anime({
+                    targets: [leftEye, rightEye],
+                    height: 5,
+                    borderRadius: '50% 50% 0 0',
+                    duration: 1000,
+                    easing: 'easeOutElastic(1, .2)'
+                });
+                
+                // 添加闪光效果
+                face.style.background = 'linear-gradient(45deg, #ffde59, #ffd700, #ffde59)';
+                face.style.animation = 'sparkle 1s infinite';
+                break;
+        }
         
         // 按钮动画
         anime({
@@ -262,43 +365,26 @@ document.addEventListener('DOMContentLoaded', () => {
             easing: 'easeOutElastic(1, .5)'
         });
         
-        // 爱心特效
-        for (let i = 0; i < 15; i++) {
+        // 爱心特效数量随级别增加
+        const heartCount = likeClickCount * 10;
+        for (let i = 0; i < heartCount; i++) {
             setTimeout(() => {
                 createHeart();
             }, i * 100);
         }
         
-        // 创建表情符号动画
-        for (let i = 0; i < 10; i++) {
+        // 表情符号数量随级别增加
+        const emojiCount = likeClickCount * 5;
+        for (let i = 0; i < emojiCount; i++) {
             setTimeout(() => {
                 createEmoji();
             }, i * 150);
         }
         
-        // 开心表情 - 使用anime.js动画
-        anime({
-            targets: mouth,
-            borderRadius: '0 0 40px 40px',
-            height: 50,
-            duration: 500,
-            easing: 'easeOutElastic(1, .5)'
-        });
-        mouth.style.borderTop = 'none';
-        mouth.style.borderBottom = '8px solid #333';
-        
-        anime({
-            targets: [leftEye, rightEye],
-            height: 10,
-            borderRadius: '50% 50% 0 0',
-            duration: 500,
-            easing: 'easeOutElastic(1, .5)'
-        });
-        
         // 脸部跳动动画
         anime({
             targets: faceContainer,
-            scale: [1, 1.1, 1],
+            scale: [1, 1.1 + (likeClickCount * 0.1), 1],
             duration: 600,
             easing: 'easeInOutQuad'
         });
@@ -319,13 +405,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 1000,
                 complete: function() {
                     startIdleAnimations();
+                    face.style.background = '#ffde59';
+                    face.style.animation = 'none';
                 }
             });
         }, 3000);
     });
     
     // 点击不喜欢按钮
-    dislikeBtn.addEventListener('click', () => {
+    dislikeBtn.addEventListener('click', (event) => {
+        dislikeClickCount = (dislikeClickCount % 3) + 1; // 1-3循环
+        createRipple(event, dislikeBtn);
+        // 播放背景音乐
+        bgMusic.play().catch(error => {
+            console.log('音乐播放失败:', error);
+        });
         // 播放音效
         playSound(dislikeSound);
         
@@ -333,72 +427,84 @@ document.addEventListener('DOMContentLoaded', () => {
         dislikeBtn.classList.add('loading');
         setTimeout(() => dislikeBtn.classList.remove('loading'), 1000);
         
-        // 愤怒表情 - 使用anime.js动画
-        anime({
-            targets: mouth,
-            borderRadius: '40px 40px 0 0',
-            height: 10,
-            duration: 300,
-            easing: 'easeOutElastic(1, .5)'
-        });
-        mouth.style.borderBottom = 'none';
-        mouth.style.borderTop = '8px solid #333';
+        // 根据点击次数设置不同的动画效果
+        switch(dislikeClickCount) {
+            case 1: // 第一级生气
+                anime({
+                    targets: mouth,
+                    borderRadius: '40px 40px 0 0',
+                    height: 10,
+                    duration: 300,
+                    easing: 'easeOutElastic(1, .5)'
+                });
+                mouth.style.borderBottom = 'none';
+                mouth.style.borderTop = '8px solid #333';
+                
+                anime({
+                    targets: face,
+                    backgroundColor: '#ff6b6b',
+                    scale: 1.2,
+                    duration: 300,
+                    easing: 'easeOutQuad'
+                });
+                break;
+                
+            case 2: // 第二级暴怒
+                anime({
+                    targets: mouth,
+                    borderRadius: '60px 60px 0 0',
+                    height: 5,
+                    duration: 500,
+                    easing: 'easeOutElastic(1, .3)'
+                });
+                mouth.style.borderBottom = 'none';
+                mouth.style.borderTop = '12px solid #333';
+                
+                anime({
+                    targets: face,
+                    backgroundColor: '#ff4444',
+                    scale: 1.3,
+                    duration: 500,
+                    easing: 'easeOutQuad'
+                });
+                break;
+                
+            case 3: // 第三级狂怒
+                anime({
+                    targets: mouth,
+                    borderRadius: '80px 80px 0 0',
+                    height: 3,
+                    duration: 700,
+                    easing: 'easeOutElastic(1, .2)'
+                });
+                mouth.style.borderBottom = 'none';
+                mouth.style.borderTop = '15px solid #333';
+                
+                anime({
+                    targets: face,
+                    backgroundColor: '#ff0000',
+                    scale: 1.4,
+                    duration: 700,
+                    easing: 'easeOutQuad'
+                });
+                
+                // 添加火焰效果
+                face.style.boxShadow = '0 0 20px #ff0000';
+                break;
+        }
         
-        // 表情变红和放大
-        anime({
-            targets: face,
-            backgroundColor: '#ff6b6b',
-            scale: 1.2,
-            duration: 300,
-            easing: 'easeOutQuad',
-            complete: function() {
-                // 3秒后恢复正常状态
-                setTimeout(() => {
-                    // 恢复表情
-                    anime({
-                        targets: face,
-                        backgroundColor: '#ffde59',
-                        scale: 1,
-                        duration: 500,
-                        easing: 'easeOutQuad'
-                    });
-                    
-                    // 恢复嘴巴
-                    anime({
-                        targets: mouth,
-                        borderRadius: '0 0 40px 40px',
-                        height: 40,
-                        duration: 500,
-                        easing: 'easeOutElastic(1, .5)'
-                    });
-                    mouth.style.borderTop = 'none';
-                    mouth.style.borderBottom = '8px solid #333';
-                    
-                    // 恢复眼睛
-                    anime({
-                        targets: [leftEye, rightEye],
-                        height: 30,
-                        borderRadius: '50%',
-                        duration: 500,
-                        easing: 'easeOutElastic(1, .5)',
-                        complete: function() {
-                            startIdleAnimations();
-                        }
-                    });
-                }, 3000);
-            }
-        });
-        
+        // 眼睛动画
         anime({
             targets: [leftEye, rightEye],
-            height: 5,
+            height: 5 - (dislikeClickCount * 1),
             borderRadius: '5px',
-            duration: 300,
+            duration: 300 + (dislikeClickCount * 100),
             easing: 'easeOutElastic(1, .5)'
         });
         
-        // 创建愤怒表情符号动画
-        for (let i = 0; i < 10; i++) {
+        // 创建愤怒表情符号动画，数量随级别增加
+        const emojiCount = dislikeClickCount * 5;
+        for (let i = 0; i < emojiCount; i++) {
             setTimeout(() => {
                 const emoji = document.createElement('div');
                 emoji.className = 'emoji';
@@ -417,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     translateY: -distance * Math.sin(angle),
                     translateX: distance * Math.cos(angle),
                     rotate: Math.random() * 360,
-                    scale: [0, 1.5],
+                    scale: [0, 1.5 + (dislikeClickCount * 0.2)],
                     opacity: {
                         value: [0, 1, 0],
                         duration: duration,
@@ -429,22 +535,38 @@ document.addEventListener('DOMContentLoaded', () => {
                         emoji.remove();
                     }
                 });
-            }, i * 150);
+            }, i * (150 - dislikeClickCount * 20));
         }
         
-        // 脸部抖动动画
+        // 脸部抖动动画，强度随级别增加
+        const shakeIntensity = dislikeClickCount * 5;
         anime({
             targets: faceContainer,
             translateX: [
-                { value: -10, duration: 100, delay: 0 },
-                { value: 10, duration: 100, delay: 0 },
-                { value: -8, duration: 100, delay: 0 },
-                { value: 8, duration: 100, delay: 0 },
-                { value: -5, duration: 100, delay: 0 },
-                { value: 5, duration: 100, delay: 0 },
+                { value: -shakeIntensity * 2, duration: 100, delay: 0 },
+                { value: shakeIntensity * 2, duration: 100, delay: 0 },
+                { value: -shakeIntensity * 1.5, duration: 100, delay: 0 },
+                { value: shakeIntensity * 1.5, duration: 100, delay: 0 },
+                { value: -shakeIntensity, duration: 100, delay: 0 },
+                { value: shakeIntensity, duration: 100, delay: 0 },
                 { value: 0, duration: 100, delay: 0 }
             ],
             easing: 'easeInOutSine'
         });
+        
+        // 3秒后恢复正常状态
+        setTimeout(() => {
+            anime({
+                targets: face,
+                backgroundColor: '#ffde59',
+                scale: 1,
+                duration: 500,
+                easing: 'easeOutQuad',
+                complete: function() {
+                    face.style.boxShadow = 'none';
+                    startIdleAnimations();
+                }
+            });
+        }, 3000);
     });
 });

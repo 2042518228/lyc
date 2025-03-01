@@ -2,10 +2,7 @@ let likeClickCount = 0;
 let dislikeClickCount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 背景音乐控制
-    const bgMusic = document.getElementById('bgMusic');
-    bgMusic.volume = 0.5; // 设置适中的音量
-
+    // 获取所有需要的 DOM 元素
     const face = document.getElementById('face');
     const mouth = document.getElementById('mouth');
     const leftEye = document.getElementById('leftEye');
@@ -14,53 +11,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const dislikeBtn = document.getElementById('dislike');
     const loveText = document.querySelector('.love-text');
     const faceContainer = document.querySelector('.face-container');
-    const particlesContainer = document.querySelector('.particles-container');
+    
     const leftBlush = document.querySelector('.blush.left');
     const rightBlush = document.querySelector('.blush.right');
     const likeSound = document.getElementById('likeSound');
     const dislikeSound = document.getElementById('dislikeSound');
-    
+    const bgMusic = document.getElementById('bgMusic');
+    bgMusic.volume = 0.5;
+
     // 定义全局变量来跟踪动画状态
     let isAnimating = false;
     let blinkInterval;
     let mouthAnimInterval;
-    
-    // 眨眼动画
-    function blinkEyes() {
+    let isMusicPlaying = false;
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+
+    // 添加鼠标移动事件监听器
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        updateEyesPosition();
+    });
+
+    // 更新眼睛位置的函数
+    function updateEyesPosition() {
         if (isAnimating) return;
-        
-        anime({
-            targets: [leftEye, rightEye],
-            height: [
-                {value: 5, duration: 100},
-                {value: 45, duration: 100}
-            ],
-            easing: 'easeInOutQuad',
-            complete: function() {
-                // 随机间隔眨眼
-                blinkInterval = setTimeout(blinkEyes, Math.random() * 3000 + 2000);
-            }
-        });
+
+        const faceRect = face.getBoundingClientRect();
+        const faceCenterX = faceRect.left + faceRect.width / 2;
+        const faceCenterY = faceRect.top + faceRect.height / 2;
+
+        const angle = Math.atan2(mouseY - faceCenterY, mouseX - faceCenterX);
+        const distance = Math.min(10, Math.sqrt(Math.pow(mouseX - faceCenterX, 2) + Math.pow(mouseY - faceCenterY, 2)) / 20);
+
+        const eyeX = Math.cos(angle) * distance;
+        const eyeY = Math.sin(angle) * distance;
+
+        leftEye.style.transform = `translate(${eyeX}px, ${eyeY}px)`;
+        rightEye.style.transform = `translate(${eyeX}px, ${eyeY}px)`;
     }
 
-    // 嘴巴微动画
-    function mouthAnimation() {
-        if (isAnimating) return;
-        
-        anime({
-            targets: mouth,
-            height: [
-                {value: 58, duration: 800},
-                {value: 60, duration: 800}
-            ],
-            easing: 'easeInOutQuad',
-            complete: function() {
-                mouthAnimInterval = setTimeout(mouthAnimation, 1600);
-            }
-        });
-    }
-    
-    // 启动默认动画
+    // 修改 startIdleAnimations 函数
     function startIdleAnimations() {
         clearTimeout(blinkInterval);
         clearTimeout(mouthAnimInterval);
@@ -72,91 +64,78 @@ document.addEventListener('DOMContentLoaded', () => {
         rightEye.style.height = '45px';
         leftEye.style.borderRadius = '50%';
         rightEye.style.borderRadius = '50%';
+        leftEye.style.transition = 'transform 0.3s ease';
+        rightEye.style.transition = 'transform 0.3s ease';
         
+        // 设置默认笑脸
         mouth.style.height = '60px';
         mouth.style.borderRadius = '0 0 60px 60px';
         mouth.style.borderTop = 'none';
         mouth.style.borderBottom = '12px solid #333';
+        mouth.style.transform = 'scale(1.1)';
+
+        // 添加默认笑脸动画
+        anime({
+            targets: mouth,
+            scale: [1.1, 1],
+            duration: 1000,
+            easing: 'easeOutElastic(1, .5)',
+            complete: function() {
+                // 启动持续的微笑动画
+                anime({
+                    targets: mouth,
+                    scale: [1, 1.05, 1],
+                    duration: 3000,
+                    easing: 'easeInOutQuad',
+                    loop: true
+                });
+            }
+        });
+
+        // 启动眨眼动画
+        function blinkEyes() {
+            if (isAnimating) return;
+            
+            anime({
+                targets: [leftEye, rightEye],
+                height: [
+                    {value: 5, duration: 100},
+                    {value: 45, duration: 100}
+                ],
+                easing: 'easeInOutQuad',
+                complete: function() {
+                    // 随机间隔眨眼
+                    blinkInterval = setTimeout(blinkEyes, Math.random() * 3000 + 2000);
+                }
+            });
+        }
+
+        // 启动嘴巴微动画
+        function mouthAnimation() {
+            if (isAnimating) return;
+            
+            anime({
+                targets: mouth,
+                height: [
+                    {value: 58, duration: 800},
+                    {value: 60, duration: 800}
+                ],
+                easing: 'easeInOutQuad',
+                complete: function() {
+                    mouthAnimInterval = setTimeout(mouthAnimation, 1600);
+                }
+            });
+        }
         
-        // 启动眨眼和嘴巴动画
+        // 启动动画
         setTimeout(blinkEyes, 500);
         setTimeout(mouthAnimation, 500);
+
+        // 初始化眼睛位置
+        updateEyesPosition();
     }
-    
-    // 初始启动待机动画
-    startIdleAnimations();
-    
-    // 创建背景云朵
-    function createClouds() {
-        for (let i = 0; i < 8; i++) {
-            const cloud = document.createElement('div');
-            cloud.className = 'cloud';
-            const size = Math.random() * 100 + 50;
-            cloud.style.width = size + 'px';
-            cloud.style.height = size / 2 + 'px';
-            cloud.style.top = Math.random() * window.innerHeight + 'px';
-            cloud.style.animationDuration = Math.random() * 20 + 10 + 's';
-            document.body.appendChild(cloud);
-            
-            setTimeout(() => cloud.remove(), (Math.random() * 20 + 10) * 1000);
-        }
-    }
-    
-    // 定期创建云朵
-    setInterval(createClouds, 10000);
-    createClouds();
-    
-    // 鼠标移动时眼睛跟随
-    document.addEventListener('mousemove', (e) => {
-        const eyeLeft = leftEye.getBoundingClientRect();
-        const eyeRight = rightEye.getBoundingClientRect();
-        
-        // 计算鼠标与按钮的距离
-        const likeRect = likeBtn.getBoundingClientRect();
-        const dislikeRect = dislikeBtn.getBoundingClientRect();
-        
-        const distToLike = Math.hypot(
-            e.clientX - (likeRect.left + likeRect.width/2),
-            e.clientY - (likeRect.top + likeRect.height/2)
-        );
-        
-        const distToDislike = Math.hypot(
-            e.clientX - (dislikeRect.left + dislikeRect.width/2),
-            e.clientY - (dislikeRect.top + dislikeRect.height/2)
-        );
-        
-        // 根据鼠标位置计算瞳孔偏移
-        const leftDx = Math.min(Math.max((e.clientX - eyeLeft.left - eyeLeft.width/2) / 10, -3), 3);
-        const leftDy = Math.min(Math.max((e.clientY - eyeLeft.top - eyeLeft.height/2) / 10, -3), 3);
-        
-        const rightDx = Math.min(Math.max((e.clientX - eyeRight.left - eyeRight.width/2) / 10, -3), 3);
-        const rightDy = Math.min(Math.max((e.clientY - eyeRight.top - eyeRight.height/2) / 10, -3), 3);
-        
-        // 应用瞳孔位置
-        anime({
-            targets: leftEye.querySelector(':after'),
-            translateX: leftDx,
-            translateY: leftDy,
-            duration: 100,
-            easing: 'easeOutQuad'
-        });
-        
-        anime({
-            targets: rightEye.querySelector(':after'),
-            translateX: rightDx,
-            translateY: rightDy,
-            duration: 100,
-            easing: 'easeOutQuad'
-        });
-        
-        // 直接设置CSS变量来移动瞳孔
-        leftEye.style.setProperty('--pupil-x', leftDx + 'px');
-        leftEye.style.setProperty('--pupil-y', leftDy + 'px');
-        rightEye.style.setProperty('--pupil-x', rightDx + 'px');
-        rightEye.style.setProperty('--pupil-y', rightDy + 'px');
-    });
-    
-    // 创建爱心特效
+
+    // 添加 createHeart 函数定义
     function createHeart() {
         const heart = document.createElement('div');
         heart.className = 'particle';
@@ -182,18 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // 创建表情符号
+
+    // 添加 createEmoji 函数定义
     function createEmoji() {
-        const emojis = ['❤️', '😊', '✨', '🌟', '💖', '💕', '💓', '💗', '💝'];
         const emoji = document.createElement('div');
         emoji.className = 'emoji';
+        const emojis = ['❤️', '😊', '✨', '🌟', '💖', '💕', '💓', '💗', '💝'];
         emoji.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
         emoji.style.left = Math.random() * 200 + 'px';
         emoji.style.top = Math.random() * 200 + 'px';
         faceContainer.appendChild(emoji);
         
-        // 添加更自然的动画
         const angle = Math.random() * Math.PI;
         const distance = Math.random() * 100 + 50;
         const duration = Math.random() * 1000 + 1500;
@@ -216,21 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // 播放音效并添加错误处理
+
+    // 添加 playSound 函数定义
     function playSound(audioElement) {
         if (audioElement) {
+            audioElement.currentTime = 0; // 重置音频到开始位置
             audioElement.play().catch(error => {
                 console.log('音频播放失败:', error);
             });
         }
     }
-    
-    // 创建背景光晕元素
-    const backgroundGlow = document.createElement('div');
-    backgroundGlow.className = 'background-glow';
-    document.body.appendChild(backgroundGlow);
-    
+
+    // 添加 createRipple 函数
     function createRipple(event, button) {
         const ripple = document.createElement('div');
         ripple.className = 'ripple';
@@ -247,15 +222,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
         ripple.addEventListener('animationend', () => ripple.remove());
     }
-    
-    // 点击喜欢按钮
+
+    // 创建一个函数来处理音乐播放
+    function handleBackgroundMusic() {
+        if (!isMusicPlaying) {
+            bgMusic.play().catch(error => {
+                console.log('音乐播放失败:', error);
+            });
+            isMusicPlaying = true;
+        }
+    }
+
+    // 修改like按钮的事件监听器
     likeBtn.addEventListener('click', (event) => {
-        likeClickCount = (likeClickCount % 3) + 1; // 1-3循环
+        handleBackgroundMusic(); // 添加音乐控制
+        likeClickCount = (likeClickCount % 3) + 1;
         createRipple(event, likeBtn);
-        // 播放背景音乐
+        // 停止当前音乐并播放新的背景音乐
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
         bgMusic.play().catch(error => {
             console.log('音乐播放失败:', error);
         });
+        // 停止当前音效并播放新的音效
+        likeSound.pause();
+        likeSound.currentTime = 0;
+        playSound(likeSound);
         // 清除所有已存在的emoji元素
         const existingEmojis = document.querySelectorAll('.emoji');
         existingEmojis.forEach(emoji => emoji.remove());

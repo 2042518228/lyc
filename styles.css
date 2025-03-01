@@ -120,6 +120,8 @@ body {
     transition: all 0.3s ease;
     overflow: hidden;
     box-shadow: inset 0 -3px 8px rgba(0,0,0,0.1);
+    --pupil-x: 0px;
+    --pupil-y: 0px;
 }
 
 .eye::after {
@@ -276,6 +278,11 @@ button:active {
     pointer-events: none;
 }
 
+.buttons button {
+    position: relative;
+    overflow: hidden;  /* 确保涟漪效果不会溢出按钮 */
+}
+
 /* 按钮悬停效果 */
 button:hover {
     transform: translateY(-2px);
@@ -376,4 +383,33 @@ button:hover {
 
 .bg-angry {
     background: linear-gradient(135deg, #ffd1d1 0%, #ffd6a5 100%);
+}
+@media screen and (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+
+    .face-container {
+        transform: scale(1);
+        margin-bottom: 30px;
+    }
+
+    .buttons {
+        transform: scale(1);
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .cloud {
+        display: none;
+    }
+
+    .background-glow {
+        opacity: 0.5;
+    }
 }

@@ -226,6 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 创建一个函数来处理音乐播放
     function handleBackgroundMusic() {
         if (!isMusicPlaying) {
+            // 添加ended事件监听器实现循环播放
+            bgMusic.addEventListener('ended', function() {
+                this.currentTime = 0;
+                this.play().catch(error => {
+                    console.log('音乐循环播放失败:', error);
+                });
+            });
+            
             bgMusic.play().catch(error => {
                 console.log('音乐播放失败:', error);
             });
@@ -233,17 +241,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 修改like按钮的事件监听器
+    // 修改 like 按钮的事件监听器
     likeBtn.addEventListener('click', (event) => {
-        handleBackgroundMusic(); // 添加音乐控制
+        handleBackgroundMusic(); // 只在第一次点击时会真正播放音乐
         likeClickCount = (likeClickCount % 3) + 1;
         createRipple(event, likeBtn);
-        // 停止当前音乐并播放新的背景音乐
-        bgMusic.pause();
-        bgMusic.currentTime = 0;
-        bgMusic.play().catch(error => {
-            console.log('音乐播放失败:', error);
-        });
+        // 删除重复的音乐控制代码
+        // bgMusic.pause();
+        // bgMusic.currentTime = 0;
+        // bgMusic.play().catch(error => {
+        //     console.log('音乐播放失败:', error);
+        // });
         // 停止当前音效并播放新的音效
         likeSound.pause();
         likeSound.currentTime = 0;
